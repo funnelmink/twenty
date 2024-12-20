@@ -10,10 +10,13 @@ import { FormRawJsonFieldInput } from '@/object-record/record-field/form-types/c
 import { FormSelectFieldInput } from '@/object-record/record-field/form-types/components/FormSelectFieldInput';
 import { FormTextFieldInput } from '@/object-record/record-field/form-types/components/FormTextFieldInput';
 import { FormUuidFieldInput } from '@/object-record/record-field/form-types/components/FormUuidFieldInput';
+import { FormDateTimeFieldInput } from '@/object-record/record-field/form-types/components/FormDateTimeFieldInput';
+import { FormCurrencyFieldInput } from '@/object-record/record-field/form-types/components/FormCurrencyFieldInput';
 import { VariablePickerComponent } from '@/object-record/record-field/form-types/types/VariablePickerComponent';
 import { FieldDefinition } from '@/object-record/record-field/types/FieldDefinition';
 import {
   FieldAddressValue,
+  FieldCurrencyValue,
   FieldEmailsValue,
   FieldFullNameValue,
   FieldLinksValue,
@@ -33,8 +36,8 @@ import { isFieldRawJson } from '@/object-record/record-field/types/guards/isFiel
 import { isFieldSelect } from '@/object-record/record-field/types/guards/isFieldSelect';
 import { isFieldText } from '@/object-record/record-field/types/guards/isFieldText';
 import { isFieldUuid } from '@/object-record/record-field/types/guards/isFieldUuid';
+import { isFieldCurrency } from '@/object-record/record-field/types/guards/isFieldCurrency';
 import { JsonValue } from 'type-fest';
-import { FormDateTimeFieldInput } from '@/object-record/record-field/form-types/components/FormDateTimeFieldInput';
 
 type FormFieldInputProps = {
   field: FieldDefinition<FieldMetadata>;
@@ -145,6 +148,13 @@ export const FormFieldInput = ({
       defaultValue={defaultValue as string | null | undefined}
       onPersist={onPersist}
       placeholder={field.label}
+      VariablePicker={VariablePicker}
+    />
+  ) : isFieldCurrency(field) ? (
+    <FormCurrencyFieldInput
+      label={field.label}
+      defaultValue={defaultValue as FieldCurrencyValue | null}
+      onPersist={onPersist}
       VariablePicker={VariablePicker}
     />
   ) : null;
