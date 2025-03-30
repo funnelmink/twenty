@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { capitalize } from 'twenty-shared';
+import { capitalize } from 'twenty-shared/utils';
+
+import { ObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/types/object-metadata-item-with-field-maps';
 
 import { ObjectMetadataItemWithFieldMaps } from 'src/engine/metadata-modules/types/object-metadata-item-with-field-maps';
 

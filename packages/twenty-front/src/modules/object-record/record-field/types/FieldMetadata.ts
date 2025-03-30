@@ -2,11 +2,12 @@ import { ThemeColor } from 'twenty-ui';
 
 import { RATING_VALUES } from '@/object-record/record-field/meta-types/constants/RatingValues';
 import { ZodHelperLiteral } from '@/object-record/record-field/types/ZodHelperLiteral';
-import { RecordForSelect } from '@/object-record/relation-picker/types/RecordForSelect';
-import { ConnectedAccountProvider } from 'twenty-shared';
+import { ObjectRecord } from '@/object-record/types/ObjectRecord';
 import * as z from 'zod';
 import { RelationDefinitionType } from '~/generated-metadata/graphql';
 import { CurrencyCode } from './CurrencyCode';
+import { ConnectedAccountProvider } from 'twenty-shared/types';
+
 export type FieldUuidMetadata = {
   objectMetadataNameSingular?: string;
   fieldName: string;
@@ -260,9 +261,9 @@ export type FieldRatingValue = (typeof RATING_VALUES)[number] | null;
 export type FieldSelectValue = string | null;
 export type FieldMultiSelectValue = string[] | null;
 
-export type FieldRelationToOneValue = RecordForSelect | null;
+export type FieldRelationToOneValue = ObjectRecord | null;
 
-export type FieldRelationFromManyValue = RecordForSelect[] | [];
+export type FieldRelationFromManyValue = ObjectRecord[];
 
 export type FieldRelationValue<
   T extends FieldRelationToOneValue | FieldRelationFromManyValue,
@@ -286,15 +287,18 @@ const FieldActorSourceSchema = z.union([
   z.literal('MANUAL'),
   z.literal('SYSTEM'),
   z.literal('WORKFLOW'),
+  z.literal('WEBHOOK'),
 ]);
 
 export const FieldActorValueSchema = z.object({
   source: FieldActorSourceSchema,
   workspaceMemberId: z.string().nullable(),
   name: z.string(),
-  context: z.object({
-    provider: z.nativeEnum(ConnectedAccountProvider).optional(),
-  }),
+  context: z
+    .object({
+      provider: z.nativeEnum(ConnectedAccountProvider).optional(),
+    })
+    .nullable(),
 });
 export type FieldActorValue = z.infer<typeof FieldActorValueSchema>;
 

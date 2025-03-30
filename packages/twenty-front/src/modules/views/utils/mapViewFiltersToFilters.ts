@@ -1,10 +1,10 @@
 import { RecordFilter } from '@/object-record/record-filter/types/RecordFilter';
-import { isDefined } from 'twenty-shared';
 
 import { FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
 
 import { getFilterTypeFromFieldType } from '@/object-metadata/utils/formatFieldMetadataItemsAsFilterDefinitions';
 import { ViewFilter } from '../types/ViewFilter';
+import { isDefined } from 'twenty-shared/utils';
 
 export const mapViewFiltersToFilters = (
   viewFilters: ViewFilter[],
@@ -32,11 +32,11 @@ export const mapViewFiltersToFilters = (
         value: viewFilter.value,
         displayValue: viewFilter.displayValue,
         operand: viewFilter.operand,
-        viewFilterGroupId: viewFilter.viewFilterGroupId,
-        positionInViewFilterGroup: viewFilter.positionInViewFilterGroup,
+        recordFilterGroupId: viewFilter.viewFilterGroupId,
+        positionInRecordFilterGroup: viewFilter.positionInViewFilterGroup,
         label: availableFieldMetadataItem.label,
         type: filterType,
-      };
+      } satisfies RecordFilter;
     })
     .filter(isDefined);
 };

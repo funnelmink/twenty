@@ -1,10 +1,8 @@
 import { FieldActorValue } from '@/object-record/record-field/types/FieldMetadata';
-import { ConnectedAccountProvider } from 'twenty-shared';
 
 import { useMemo } from 'react';
 import {
   AvatarChip,
-  AvatarChipVariant,
   IconApi,
   IconCalendar,
   IconCsv,
@@ -15,7 +13,9 @@ import {
   IconMicrosoftOutlook,
   IconRobot,
   IconSettingsAutomation,
+  IconWebhook,
 } from 'twenty-ui';
+import { ConnectedAccountProvider } from 'twenty-shared/types';
 
 type ActorDisplayProps = Partial<FieldActorValue> & {
   avatarUrl?: string | null;
@@ -55,6 +55,8 @@ export const ActorDisplay = ({
         return IconRobot;
       case 'WORKFLOW':
         return IconSettingsAutomation;
+      case 'WEBHOOK':
+        return IconWebhook;
       default:
         return undefined;
     }
@@ -71,7 +73,6 @@ export const ActorDisplay = ({
       LeftIcon={LeftIcon}
       avatarUrl={avatarUrl ?? undefined}
       isIconInverted={isIconInverted}
-      variant={AvatarChipVariant.Transparent}
     />
   );
 };

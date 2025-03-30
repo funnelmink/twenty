@@ -1,4 +1,3 @@
-import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 
 import { BaseEmail } from 'src/components/BaseEmail';
@@ -6,7 +5,7 @@ import { CallToAction } from 'src/components/CallToAction';
 import { Footer } from 'src/components/Footer';
 import { MainText } from 'src/components/MainText';
 import { Title } from 'src/components/Title';
-import { APP_LOCALES } from 'twenty-shared';
+import { APP_LOCALES } from 'twenty-shared/translations';
 
 type SendEmailVerificationLinkEmailProps = {
   link: string;
@@ -19,8 +18,8 @@ export const SendEmailVerificationLinkEmail = ({
 }: SendEmailVerificationLinkEmailProps) => {
   return (
     <BaseEmail width={333} locale={locale}>
-      <Title value={t`Confirm your email address`} />
-      <CallToAction href={link} value={t`Verify Email`} />
+      <Title value={<Trans>Confirm your email address</Trans>} />
+      <CallToAction href={link} value={<Trans>Verify Email</Trans>} />
       <br />
       <br />
       <MainText>

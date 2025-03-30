@@ -15,8 +15,8 @@ import {
 } from '@/workflow/workflow-diagram/types/WorkflowDiagram';
 import { getWorkflowDiagramTriggerNode } from '@/workflow/workflow-diagram/utils/getWorkflowDiagramTriggerNode';
 import { TRIGGER_STEP_ID } from '@/workflow/workflow-trigger/constants/TriggerStepId';
-import { isDefined } from 'twenty-shared';
 import { v4 } from 'uuid';
+import { isDefined } from 'twenty-shared/utils';
 
 export const generateWorkflowRunDiagram = ({
   trigger,
@@ -83,15 +83,10 @@ export const generateWorkflowRunDiagram = ({
     let runStatus: WorkflowDiagramRunStatus;
     if (skippedExecution) {
       runStatus = 'not-executed';
-    } else if (!isDefined(runResult)) {
+    } else if (!isDefined(runResult) || isDefined(runResult.pendingEvent)) {
       runStatus = 'running';
     } else {
-      const lastAttempt = runResult.outputs.at(-1);
-
-      if (!isDefined(lastAttempt)) {
-        // Should never happen. Should we throw instead?
-        runStatus = 'failure';
-      } else if (isDefined(lastAttempt.error)) {
+      if (isDefined(runResult.error)) {
         runStatus = 'failure';
       } else {
         runStatus = 'success';
@@ -104,7 +99,6 @@ export const generateWorkflowRunDiagram = ({
         nodeType: 'action',
         actionType: step.type,
         name: step.name,
-        isLeafNode: false,
         runStatus,
       },
       position: {

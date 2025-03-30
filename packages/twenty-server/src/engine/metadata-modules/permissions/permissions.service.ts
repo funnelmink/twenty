@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-  PermissionsOnAllObjectRecords,
-  SettingsPermissions,
-} from 'twenty-shared';
+import { PermissionsOnAllObjectRecords } from 'twenty-shared/constants';
+import { isDefined } from 'twenty-shared/utils';
 
+import {
+  AuthException,
+  AuthExceptionCode,
+} from 'src/engine/core-modules/auth/auth.exception';
 import { EnvironmentService } from 'src/engine/core-modules/environment/environment.service';
+import { SettingPermissionType } from 'src/engine/metadata-modules/permissions/constants/setting-permission-type.constants';
 import {
   PermissionsException,
   PermissionsExceptionCode,
@@ -28,7 +31,7 @@ export class PermissionsService {
     userWorkspaceId: string;
     workspaceId: string;
   }): Promise<{
-    settingsPermissions: Record<SettingsPermissions, boolean>;
+    settingsPermissions: Record<SettingPermissionType, boolean>;
     objectRecordsPermissions: Record<PermissionsOnAllObjectRecords, boolean>;
   }> {
     const [roleOfUserWorkspace] = await this.userRoleService
@@ -44,12 +47,12 @@ export class PermissionsService {
       hasPermissionOnSettingFeature = true;
     }
 
-    const settingsPermissionsMap = Object.keys(SettingsPermissions).reduce(
+    const settingsPermissionsMap = Object.keys(SettingPermissionType).reduce(
       (acc, feature) => ({
         ...acc,
         [feature]: hasPermissionOnSettingFeature,
       }),
-      {} as Record<SettingsPermissions, boolean>,
+      {} as Record<SettingPermissionType, boolean>,
     );
 
     const objectRecordsPermissionsMap: Record<
@@ -76,11 +79,24 @@ export class PermissionsService {
     userWorkspaceId,
     workspaceId,
     _setting,
+    isExecutedByApiKey,
   }: {
-    userWorkspaceId: string;
+    userWorkspaceId?: string;
     workspaceId: string;
-    _setting: SettingsPermissions;
+    _setting: SettingPermissionType;
+    isExecutedByApiKey: boolean;
   }): Promise<boolean> {
+    if (isExecutedByApiKey) {
+      return true;
+    }
+
+    if (!isDefined(userWorkspaceId)) {
+      throw new AuthException(
+        'Missing userWorkspaceId or apiKey in authContext',
+        AuthExceptionCode.USER_WORKSPACE_NOT_FOUND,
+      );
+    }
+
     const [roleOfUserWorkspace] = await this.userRoleService
       .getRolesByUserWorkspaces({
         userWorkspaceIds: [userWorkspaceId],
@@ -99,11 +115,24 @@ export class PermissionsService {
     userWorkspaceId,
     workspaceId,
     requiredPermission,
+    isExecutedByApiKey,
   }: {
-    userWorkspaceId: string;
+    userWorkspaceId?: string;
     workspaceId: string;
     requiredPermission: PermissionsOnAllObjectRecords;
+    isExecutedByApiKey: boolean;
   }): Promise<boolean> {
+    if (isExecutedByApiKey) {
+      return true;
+    }
+
+    if (!isDefined(userWorkspaceId)) {
+      throw new AuthException(
+        'Missing userWorkspaceId or apiKey in authContext',
+        AuthExceptionCode.USER_WORKSPACE_NOT_FOUND,
+      );
+    }
+
     const [roleOfUserWorkspace] = await this.userRoleService
       .getRolesByUserWorkspaces({
         userWorkspaceIds: [userWorkspaceId],
@@ -115,10 +144,6 @@ export class PermissionsService {
       this.getRoleColumnForRequiredPermission(requiredPermission);
 
     return roleOfUserWorkspace?.[roleColumn] === true;
-  }
-
-  public async isPermissionsEnabled(): Promise<boolean> {
-    return this.environmentService.get('PERMISSIONS_ENABLED') === true;
   }
 
   private getRoleColumnForRequiredPermission(

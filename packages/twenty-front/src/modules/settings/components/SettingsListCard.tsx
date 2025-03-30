@@ -36,15 +36,18 @@ const StyledButton = styled.button`
 type SettingsListCardProps<ListItem extends { id: string }> = {
   items: ListItem[];
   getItemLabel: (item: ListItem) => string;
+  getItemDescription?: (item: ListItem) => string;
   hasFooter?: boolean;
   isLoading?: boolean;
   onRowClick?: (item: ListItem) => void;
   RowIcon?: IconComponent;
   RowIconFn?: (item: ListItem) => IconComponent;
+  RowIconColor?: string;
   RowRightComponent: ComponentType<{ item: ListItem }>;
   footerButtonLabel?: string;
   onFooterButtonClick?: () => void;
   to?: (item: ListItem) => string;
+  rounded?: boolean;
 };
 
 export const SettingsListCard = <
@@ -54,30 +57,35 @@ export const SettingsListCard = <
 >({
   items,
   getItemLabel,
+  getItemDescription,
   hasFooter,
   isLoading,
   onRowClick,
   RowIcon,
   RowIconFn,
+  RowIconColor,
   RowRightComponent,
   onFooterButtonClick,
   footerButtonLabel,
   to,
+  rounded,
 }: SettingsListCardProps<ListItem>) => {
   const theme = useTheme();
 
   if (isLoading === true) return <SettingsListSkeletonCard />;
 
   return (
-    <Card>
+    <Card rounded={rounded}>
       {items.map((item, index) => (
         <SettingsListItemCardContent
           key={item.id}
           LeftIcon={RowIconFn ? RowIconFn(item) : RowIcon}
+          LeftIconColor={RowIconColor}
           label={getItemLabel(item)}
+          description={getItemDescription?.(item)}
           rightComponent={<RowRightComponent item={item} />}
           divider={index < items.length - 1}
-          onClick={() => onRowClick?.(item)}
+          onClick={onRowClick ? () => onRowClick?.(item) : undefined}
           to={to?.(item)}
         />
       ))}

@@ -3,11 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { ActorMetadata } from 'src/engine/metadata-modules/field-metadata/composite-types/actor.composite-type';
 import { TwentyORMManager } from 'src/engine/twenty-orm/twenty-orm.manager';
 import {
+  StepOutput,
   WorkflowRunOutput,
   WorkflowRunStatus,
   WorkflowRunWorkspaceEntity,
 } from 'src/modules/workflow/common/standard-objects/workflow-run.workspace-entity';
 import { WorkflowCommonWorkspaceService } from 'src/modules/workflow/common/workspace-services/workflow-common.workspace-service';
+import { WorkflowAction } from 'src/modules/workflow/workflow-executor/workflow-actions/types/workflow-action.type';
 import {
   WorkflowRunException,
   WorkflowRunExceptionCode,
@@ -125,11 +127,11 @@ export class WorkflowRunWorkspaceService {
 
   async saveWorkflowRunState({
     workflowRunId,
-    output,
+    stepOutput,
     context,
   }: {
     workflowRunId: string;
-    output: Pick<WorkflowRunOutput, 'error' | 'stepsOutput'>;
+    stepOutput: StepOutput;
     context: Record<string, any>;
   }) {
     const workflowRunRepository =
@@ -154,9 +156,82 @@ export class WorkflowRunWorkspaceService {
           trigger: undefined,
           steps: [],
         },
-        ...output,
+        stepsOutput: {
+          ...(workflowRunToUpdate.output?.stepsOutput ?? {}),
+          [stepOutput.id]: stepOutput.output,
+        },
       },
       context,
     });
+  }
+
+  async updateWorkflowRunStep({
+    workflowRunId,
+    step,
+  }: {
+    workflowRunId: string;
+    step: WorkflowAction;
+  }) {
+    const workflowRunRepository =
+      await this.twentyORMManager.getRepository<WorkflowRunWorkspaceEntity>(
+        'workflowRun',
+      );
+
+    const workflowRunToUpdate = await workflowRunRepository.findOneBy({
+      id: workflowRunId,
+    });
+
+    if (!workflowRunToUpdate) {
+      throw new WorkflowRunException(
+        'No workflow run to update',
+        WorkflowRunExceptionCode.WORKFLOW_RUN_NOT_FOUND,
+      );
+    }
+
+    if (
+      workflowRunToUpdate.status === WorkflowRunStatus.COMPLETED ||
+      workflowRunToUpdate.status === WorkflowRunStatus.FAILED
+    ) {
+      throw new WorkflowRunException(
+        'Cannot update steps of a completed or failed workflow run',
+        WorkflowRunExceptionCode.INVALID_OPERATION,
+      );
+    }
+
+    const updatedSteps = workflowRunToUpdate.output?.flow?.steps?.map(
+      (existingStep) => (step.id === existingStep.id ? step : existingStep),
+    );
+
+    return workflowRunRepository.update(workflowRunToUpdate.id, {
+      output: {
+        ...(workflowRunToUpdate.output ?? {}),
+        flow: {
+          ...(workflowRunToUpdate.output?.flow ?? {}),
+          steps: updatedSteps,
+        },
+      },
+    });
+  }
+
+  async getWorkflowRunOrFail(
+    workflowRunId: string,
+  ): Promise<WorkflowRunWorkspaceEntity> {
+    const workflowRunRepository =
+      await this.twentyORMManager.getRepository<WorkflowRunWorkspaceEntity>(
+        'workflowRun',
+      );
+
+    const workflowRun = await workflowRunRepository.findOne({
+      where: { id: workflowRunId },
+    });
+
+    if (!workflowRun) {
+      throw new WorkflowRunException(
+        'Workflow run not found',
+        WorkflowRunExceptionCode.WORKFLOW_RUN_NOT_FOUND,
+      );
+    }
+
+    return workflowRun;
   }
 }

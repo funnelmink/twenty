@@ -1,4 +1,3 @@
-import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { Img } from '@react-email/components';
 import { emailTheme } from 'src/common-style';
@@ -12,7 +11,8 @@ import { MainText } from 'src/components/MainText';
 import { Title } from 'src/components/Title';
 import { WhatIsTwenty } from 'src/components/WhatIsTwenty';
 import { capitalize } from 'src/utils/capitalize';
-import { APP_LOCALES, getImageAbsoluteURI } from 'twenty-shared';
+import { APP_LOCALES } from 'twenty-shared/translations';
+import { getImageAbsoluteURI } from 'twenty-shared/utils';
 
 type SendInviteLinkEmailProps = {
   link: string;
@@ -39,7 +39,7 @@ export const SendInviteLinkEmail = ({
 
   return (
     <BaseEmail width={333} locale={locale}>
-      <Title value={t`Join your team on Twenty`} />
+      <Title value={<Trans>Join your team on Twenty</Trans>} />
       <MainText>
         {capitalize(sender.firstName)} (
         <Link
@@ -47,14 +47,14 @@ export const SendInviteLinkEmail = ({
           value={sender.email}
           color={emailTheme.font.colors.blue}
         />
-        )<Trans>has invited you to join a workspace called </Trans>
+        ) <Trans>has invited you to join a workspace called </Trans>
         <b>{workspace.name}</b>
         <br />
       </MainText>
       <HighlightedContainer>
         {workspaceLogo && <Img src={workspaceLogo} width={40} height={40} />}
         {workspace.name && <HighlightedText value={workspace.name} />}
-        <CallToAction href={link} value={t`Accept invite`} />
+        <CallToAction href={link} value={<Trans>Accept invite</Trans>} />
       </HighlightedContainer>
       <WhatIsTwenty />
     </BaseEmail>

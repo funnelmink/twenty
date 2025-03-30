@@ -14,9 +14,13 @@ import {
 import { TextInput } from '@/ui/input/components/TextInput';
 import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useMemo, useState } from 'react';
-import { isDefined } from 'twenty-shared';
-import { IconCalendar, OverflowingTextWithTooltip } from 'twenty-ui';
+import { useState } from 'react';
+import { isDefined } from 'twenty-shared/utils';
+import {
+  IconCalendar,
+  OverflowingTextWithTooltip,
+  isModifiedEvent,
+} from 'twenty-ui';
 
 import { formatToHumanReadableDate } from '~/utils/date-utils';
 import { getFileNameAndExtension } from '~/utils/file/getFileNameAndExtension';
@@ -90,11 +94,6 @@ export const AttachmentRow = ({
   const [attachmentFileName, setAttachmentFileName] =
     useState(originalFileName);
 
-  const fieldContext = useMemo(
-    () => ({ recoilScopeId: attachment?.id ?? '' }),
-    [attachment?.id],
-  );
-
   const { destroyOneRecord: destroyOneAttachment } = useDestroyOneRecord({
     objectNameSingular: CoreObjectNameSingular.Attachment,
   });
@@ -145,7 +144,7 @@ export const AttachmentRow = ({
 
   const handleOpenDocument = (e: React.MouseEvent) => {
     // Cmd/Ctrl+click opens new tab, right click opens context menu
-    if (e.metaKey || e.ctrlKey || e.button === 2) {
+    if (isModifiedEvent(e) || e.button === 2) {
       return;
     }
 
@@ -157,7 +156,13 @@ export const AttachmentRow = ({
   };
 
   return (
-    <FieldContext.Provider value={fieldContext as GenericFieldContextType}>
+    <FieldContext.Provider
+      value={
+        {
+          recordId: attachment.id,
+        } as GenericFieldContextType
+      }
+    >
       <ActivityRow disabled>
         <StyledLeftContent>
           <AttachmentIcon attachmentType={attachment.type} />

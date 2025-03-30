@@ -3,26 +3,33 @@ import { useRecoilState } from 'recoil';
 
 import { FieldContext } from '@/object-record/record-field/contexts/FieldContext';
 import { usePreviousHotkeyScope } from '@/ui/utilities/hotkey/hooks/usePreviousHotkeyScope';
-import { HotkeyScope } from '@/ui/utilities/hotkey/types/HotkeyScope';
-import { isDefined } from 'twenty-shared';
 
 import { useInitDraftValueV2 } from '@/object-record/record-field/hooks/useInitDraftValueV2';
+import { RecordFieldComponentInstanceContext } from '@/object-record/record-field/states/contexts/RecordFieldComponentInstanceContext';
+import { useRecordInlineCellContext } from '@/object-record/record-inline-cell/components/RecordInlineCellContext';
 import { getDropdownFocusIdForRecordField } from '@/object-record/utils/getDropdownFocusIdForRecordField';
 import { useGoBackToPreviousDropdownFocusId } from '@/ui/layout/dropdown/hooks/useGoBackToPreviousDropdownFocusId';
 import { useSetActiveDropdownFocusIdAndMemorizePrevious } from '@/ui/layout/dropdown/hooks/useSetFocusedDropdownIdAndMemorizePrevious';
+import { useAvailableComponentInstanceIdOrThrow } from '@/ui/utilities/state/component-state/hooks/useAvailableComponentInstanceIdOrThrow';
 import { isInlineCellInEditModeScopedState } from '../states/isInlineCellInEditModeScopedState';
 import { InlineCellHotkeyScope } from '../types/InlineCellHotkeyScope';
+import { isDefined } from 'twenty-shared/utils';
 
-export const useInlineCell = () => {
-  const {
-    recoilScopeId = '',
-    recordId,
-    fieldDefinition,
-  } = useContext(FieldContext);
+export const useInlineCell = (
+  recordFieldComponentInstanceIdFromProps?: string,
+) => {
+  const { recordId, fieldDefinition } = useContext(FieldContext);
+
+  const recordFieldComponentInstanceId = useAvailableComponentInstanceIdOrThrow(
+    RecordFieldComponentInstanceContext,
+    recordFieldComponentInstanceIdFromProps,
+  );
 
   const [isInlineCellInEditMode, setIsInlineCellInEditMode] = useRecoilState(
-    isInlineCellInEditModeScopedState(recoilScopeId),
+    isInlineCellInEditModeScopedState(recordFieldComponentInstanceId),
   );
+
+  const { onOpenEditMode, onCloseEditMode } = useRecordInlineCellContext();
 
   const { setActiveDropdownFocusIdAndMemorizePrevious } =
     useSetActiveDropdownFocusIdAndMemorizePrevious();
@@ -37,6 +44,7 @@ export const useInlineCell = () => {
   const initFieldInputDraftValue = useInitDraftValueV2();
 
   const closeInlineCell = () => {
+    onCloseEditMode?.();
     setIsInlineCellInEditMode(false);
 
     goBackToPreviousHotkeyScope();
@@ -44,15 +52,17 @@ export const useInlineCell = () => {
     goBackToPreviousDropdownFocusId();
   };
 
-  const openInlineCell = (customEditHotkeyScopeForField?: HotkeyScope) => {
+  const openInlineCell = (customEditHotkeyScopeForField?: string) => {
+    onOpenEditMode?.();
     setIsInlineCellInEditMode(true);
-    initFieldInputDraftValue({ recordId, fieldDefinition });
+    initFieldInputDraftValue({
+      recordId,
+      fieldDefinition,
+      fieldComponentInstanceId: recordFieldComponentInstanceId,
+    });
 
     if (isDefined(customEditHotkeyScopeForField)) {
-      setHotkeyScopeAndMemorizePreviousScope(
-        customEditHotkeyScopeForField.scope,
-        customEditHotkeyScopeForField.customScopes,
-      );
+      setHotkeyScopeAndMemorizePreviousScope(customEditHotkeyScopeForField);
     } else {
       setHotkeyScopeAndMemorizePreviousScope(InlineCellHotkeyScope.InlineCell);
     }

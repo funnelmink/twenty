@@ -4,6 +4,7 @@ import { useRecoilValue } from 'recoil';
 import {
   IconApps,
   IconButton,
+  IconButtonSize,
   IconButtonVariant,
   IconComponent,
   LightIconButton,
@@ -21,6 +22,7 @@ import { useSelectableList } from '@/ui/layout/selectable-list/hooks/useSelectab
 import { usePreviousHotkeyScope } from '@/ui/utilities/hotkey/hooks/usePreviousHotkeyScope';
 import { arrayToChunks } from '~/utils/array/arrayToChunks';
 
+import { t } from '@lingui/core/macro';
 import { IconPickerHotkeyScope } from '../types/IconPickerHotkeyScope';
 
 export type IconPickerProps = {
@@ -33,6 +35,7 @@ export type IconPickerProps = {
   onOpen?: () => void;
   variant?: IconButtonVariant;
   className?: string;
+  size?: IconButtonSize;
 };
 
 const StyledMenuIconItemsContainer = styled.div`
@@ -90,6 +93,7 @@ export const IconPicker = ({
   onOpen,
   variant = 'secondary',
   className,
+  size = 'medium',
 }: IconPickerProps) => {
   const [searchString, setSearchString] = useState('');
   const {
@@ -167,6 +171,7 @@ export const IconPicker = ({
             disabled={disabled}
             Icon={icon}
             variant={variant}
+            size={size}
           />
         }
         dropdownMenuWidth={176}
@@ -182,7 +187,7 @@ export const IconPicker = ({
           >
             <DropdownMenu width={176}>
               <DropdownMenuSearchInput
-                placeholder="Search icon"
+                placeholder={t`Search icon`}
                 autoFocus
                 onChange={(event) => {
                   setSearchString(event.target.value);

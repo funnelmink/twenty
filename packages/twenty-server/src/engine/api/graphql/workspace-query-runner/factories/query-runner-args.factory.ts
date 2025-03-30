@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { ServerBlockNoteEditor } from '@blocknote/server-util';
-import { FieldMetadataType } from 'twenty-shared';
+import { FieldMetadataType } from 'twenty-shared/types';
 
 import {
   ObjectRecord,
@@ -205,6 +205,10 @@ export class QueryRunnerArgsFactory {
         }
         case FieldMetadataType.NUMBER:
           return [key, value === null ? null : Number(value)];
+        case FieldMetadataType.RICH_TEXT:
+          throw new Error(
+            'Rich text is not supported, please use RICH_TEXT_V2 instead',
+          );
         case FieldMetadataType.RICH_TEXT_V2: {
           const richTextV2Value = richTextV2ValueSchema.parse(value);
 

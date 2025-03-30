@@ -3,7 +3,6 @@ import { useRecoilValue } from 'recoil';
 import { Key } from 'ts-key-enum';
 
 import { FieldMultiSelectValue } from '@/object-record/record-field/types/FieldMetadata';
-import { MULTI_OBJECT_RECORD_SELECT_SELECTABLE_LIST_ID } from '@/object-record/relation-picker/constants/MultiObjectRecordSelectSelectableListId';
 import { SelectOption } from '@/spreadsheet-import/types';
 import { DropdownMenu } from '@/ui/layout/dropdown/components/DropdownMenu';
 import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
@@ -14,11 +13,12 @@ import { useSelectableListStates } from '@/ui/layout/selectable-list/hooks/inter
 import { useSelectableList } from '@/ui/layout/selectable-list/hooks/useSelectableList';
 import { useScopedHotkeys } from '@/ui/utilities/hotkey/hooks/useScopedHotkeys';
 import { useListenClickOutside } from '@/ui/utilities/pointer-event/hooks/useListenClickOutside';
-import { isDefined } from 'twenty-shared';
 import { MenuItemMultiSelectTag } from 'twenty-ui';
 import { turnIntoEmptyStringIfWhitespacesOnly } from '~/utils/string/turnIntoEmptyStringIfWhitespacesOnly';
+import { isDefined } from 'twenty-shared/utils';
 
 type MultiSelectInputProps = {
+  selectableListComponentInstanceId: string;
   values: FieldMultiSelectValue;
   hotkeyScope: string;
   onCancel?: () => void;
@@ -27,6 +27,7 @@ type MultiSelectInputProps = {
 };
 
 export const MultiSelectInput = ({
+  selectableListComponentInstanceId,
   values,
   options,
   hotkeyScope,
@@ -34,10 +35,10 @@ export const MultiSelectInput = ({
   onOptionSelected,
 }: MultiSelectInputProps) => {
   const { selectedItemIdState } = useSelectableListStates({
-    selectableListScopeId: MULTI_OBJECT_RECORD_SELECT_SELECTABLE_LIST_ID,
+    selectableListScopeId: selectableListComponentInstanceId,
   });
   const { resetSelectedItem } = useSelectableList(
-    MULTI_OBJECT_RECORD_SELECT_SELECTABLE_LIST_ID,
+    selectableListComponentInstanceId,
   );
 
   const selectedItemId = useRecoilValue(selectedItemIdState);
@@ -96,7 +97,7 @@ export const MultiSelectInput = ({
 
   return (
     <SelectableList
-      selectableListId={MULTI_OBJECT_RECORD_SELECT_SELECTABLE_LIST_ID}
+      selectableListId={selectableListComponentInstanceId}
       selectableItemIdArray={optionIds}
       hotkeyScope={hotkeyScope}
       onEnter={(itemId) => {

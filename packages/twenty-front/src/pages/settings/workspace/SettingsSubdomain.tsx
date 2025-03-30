@@ -6,21 +6,12 @@ import { H2Title, Section } from 'twenty-ui';
 
 import { domainConfigurationState } from '@/domain-manager/states/domainConfigurationState';
 import { useRecoilValue } from 'recoil';
-import { isDefined } from 'twenty-shared';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
+import { isDefined } from 'twenty-shared/utils';
 
 const StyledDomainFormWrapper = styled.div`
   align-items: center;
   display: flex;
-`;
-
-const StyledDomain = styled.h2`
-  align-self: flex-start;
-  color: ${({ theme }) => theme.font.color.secondary};
-  font-size: ${({ theme }) => theme.font.size.md};
-  font-weight: ${({ theme }) => theme.font.weight.medium};
-  margin: ${({ theme }) => theme.spacing(2)};
-  white-space: nowrap;
 `;
 
 export const SettingsSubdomain = () => {
@@ -51,13 +42,13 @@ export const SettingsSubdomain = () => {
                 onChange={onChange}
                 error={error?.message}
                 disabled={!!currentWorkspace?.customDomain}
+                rightAdornment={
+                  isDefined(domainConfiguration.frontDomain)
+                    ? `.${domainConfiguration.frontDomain}`
+                    : undefined
+                }
                 fullWidth
               />
-              {isDefined(domainConfiguration.frontDomain) && (
-                <StyledDomain>
-                  {`.${domainConfiguration.frontDomain}`}
-                </StyledDomain>
-              )}
             </>
           )}
         />

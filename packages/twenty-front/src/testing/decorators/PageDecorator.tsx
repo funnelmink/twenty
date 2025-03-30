@@ -22,16 +22,17 @@ import { mockedApolloClient } from '~/testing/mockedApolloClient';
 
 import { RecoilDebugObserverEffect } from '@/debug/components/RecoilDebugObserver';
 import { ObjectMetadataItemsProvider } from '@/object-metadata/components/ObjectMetadataItemsProvider';
+import { RecordFilterGroupsComponentInstanceContext } from '@/object-record/record-filter-group/states/context/RecordFilterGroupsComponentInstanceContext';
 import { RecordFiltersComponentInstanceContext } from '@/object-record/record-filter/states/context/RecordFiltersComponentInstanceContext';
 import { RecordSortsComponentInstanceContext } from '@/object-record/record-sort/states/context/RecordSortsComponentInstanceContext';
 import { PrefetchDataProvider } from '@/prefetch/components/PrefetchDataProvider';
 import { WorkspaceProviderEffect } from '@/workspace/components/WorkspaceProviderEffect';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
-import { SOURCE_LOCALE } from 'twenty-shared';
 import { IconsProvider } from 'twenty-ui';
 import { dynamicActivate } from '~/utils/i18n/dynamicActivate';
 import { FullHeightStorybookLayout } from '../FullHeightStorybookLayout';
+import { SOURCE_LOCALE } from 'twenty-shared/translations';
 
 export type PageDecoratorArgs = {
   routePath: string;
@@ -88,9 +89,14 @@ const Providers = () => {
                   <ObjectMetadataItemsProvider>
                     <FullHeightStorybookLayout>
                       <HelmetProvider>
-                        <SnackBarProviderScope snackBarManagerScopeId="snack-bar-manager">
-                          <IconsProvider>
-                            <PrefetchDataProvider>
+                        <IconsProvider>
+                          <PrefetchDataProvider>
+                            <RecordFilterGroupsComponentInstanceContext.Provider
+                              value={{
+                                instanceId:
+                                  'storybook-test-record-filter-groups',
+                              }}
+                            >
                               <RecordFiltersComponentInstanceContext.Provider
                                 value={{
                                   instanceId: 'storybook-test-record-filters',
@@ -104,9 +110,9 @@ const Providers = () => {
                                   <Outlet />
                                 </RecordSortsComponentInstanceContext.Provider>
                               </RecordFiltersComponentInstanceContext.Provider>
-                            </PrefetchDataProvider>
-                          </IconsProvider>
-                        </SnackBarProviderScope>
+                            </RecordFilterGroupsComponentInstanceContext.Provider>
+                          </PrefetchDataProvider>
+                        </IconsProvider>
                       </HelmetProvider>
                     </FullHeightStorybookLayout>
                   </ObjectMetadataItemsProvider>
